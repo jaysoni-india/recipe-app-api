@@ -17,6 +17,7 @@ class PublicCreateUserApiTests(TestCase):
         self.client = APIClient()
         self.payload = {'name':'Demo User', 'email':'test@test.com', 'password':'testpassword'}
         self.CREATE_USER_URL = reverse('user:create')
+        self.TOKEN_URL = reverse('user:token')
     
     def test_create_valid_user_success(self):
         """Test creating user with valid payload is successful"""        
@@ -36,7 +37,7 @@ class PublicCreateUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_user_password_strength(self):
+    def test_password_too_short(self):
         """Test password must have greater than 5 character"""
         payload = self.payload
 
@@ -45,4 +46,43 @@ class PublicCreateUserApiTests(TestCase):
         res = self.client.post(self.CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_create_token_for_user(self):
+        """ Test that a toke is created for the user """
+        payload = self.payload
+
+        create_user(**payload)
+        
+        res = self.client.post(self.TOKEN_URL, payload)
+
+        # self.assertIn('token', res.data)
+        # self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_create_token_invalid_credentials(self):
+        """Test user for invalid credentials """
+        payload = self.payload
+        create_user(**payload)
+        payload['password'] = 'asdlfjalsdjfl@3242ljlsajdfl'
+
+        res = self.client.post(self.TOKEN_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+    def test_token_no_user(self):
+        """Test that token is not created"""
+        payload = self.payload
+        res = self.client.post(self.TOKEN_URL, payload)
+        self.assertNotIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_token_missing_valid_user(self):
+        """Test that email and password are required"""
+        res = self.client.post(self.TOKEN_URL, {'email': 'one', 'password':''})
+        self.assertNotIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+
+
         

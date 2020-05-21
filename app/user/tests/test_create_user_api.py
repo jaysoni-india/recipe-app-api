@@ -49,14 +49,13 @@ class PublicCreateUserApiTests(TestCase):
     
     def test_create_token_for_user(self):
         """ Test that a toke is created for the user """
-        payload = self.payload
-
+        payload = self.payload        
         create_user(**payload)
-        
+        payload['username'] = payload['email']
+        del payload['email']        
         res = self.client.post(self.TOKEN_URL, payload)
-
-        # self.assertIn('token', res.data)
-        # self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_create_token_invalid_credentials(self):
         """Test user for invalid credentials """

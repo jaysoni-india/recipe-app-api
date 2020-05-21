@@ -24,6 +24,9 @@ class AuthTokenSerializer(serializers.Serializer):
         trim_whitespace=False
     )
 
+    # class Meta:
+    #     extra_kwargs = {'username': {'required': False}}
+
     def validate(self, attrs):
         """"Validate and authenticate the user"""
         email = attrs.get('email')

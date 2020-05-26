@@ -19,14 +19,14 @@ class PublicTagsApiTests(TestCase):
     def test_login_required(self):
         """Test that login is required for retriving tags"""
         res = self.client.get(TAGS_URL)
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class PrivateTagsAPITest(TestCase):
     """Test auth user tags API"""
 
     def setUp(self):
-        self.user = get_user().objects.create_user(
+        self.user = get_user_model().objects.create_user(
             'test@test.com',
             'passwordtest'
         )
@@ -37,7 +37,7 @@ class PrivateTagsAPITest(TestCase):
     def test_retirieve_tags(self):
         """Test retrieving tags"""
         Tag.objects.create(user=self.user, name='Vegan')
-        Tag.objects.craet(user=self.user, name='Dessert')
+        Tag.objects.create(user=self.user, name='Dessert')
 
         res = self.client.get(TAGS_URL)
 
@@ -58,7 +58,7 @@ class PrivateTagsAPITest(TestCase):
         
         res = self.client.get(TAGS_URL)
 
-        self.assertEqual(status.HTTP_200_OK, res.status)
+        self.assertEqual(status.HTTP_200_OK, res.status_code)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], tag.name)
 
